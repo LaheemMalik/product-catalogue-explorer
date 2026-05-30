@@ -4,6 +4,7 @@ import { useCategories } from './hooks/useCategories';
 import { useDebounce } from './hooks/useDebounce';
 import { useUrlState } from './hooks/useUrlState';
 import { sanitizeSearch } from './utils/validate';
+import ActiveFilters from './components/ActiveFilters/ActiveFilters';
 import ProductGrid from './components/ProductGrid/ProductGrid';
 import SkeletonGrid from './components/Skeleton/Skeleton';
 import ErrorState from './components/ErrorState/ErrorState';
@@ -71,7 +72,19 @@ function App() {
               onChange={(s) => updateUrl({ sort: s })}
             />
           </div>
-
+          <ActiveFilters
+  search={urlState.search}
+  category={urlState.category}
+  onClearSearch={() => {
+    setSearchInput('');
+    updateUrl({ search: '' });
+  }}
+  onClearCategory={() => updateUrl({ category: '' })}
+  onClearAll={() => {
+    setSearchInput('');
+    updateUrl({ search: '', category: '', sort: '' });
+  }}
+/>
           {status === 'loading' && <SkeletonGrid count={8} />}
           {status === 'error' && <ErrorState error={error} onRetry={retry} />}
           {status === 'empty' && (
