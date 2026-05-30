@@ -80,7 +80,7 @@ function App() {
       <header className={styles.header}>
         <div className={styles.headerInner}>
           <div className={styles.brand}>
-            <h1 className={styles.logo}>Catalog</h1>
+            <h1 className={styles.logo}>Catalog &nbsp;</h1>
             <span className={styles.tagline}> Browse products</span>
           </div>
           <SearchBar value={searchInput} onChange={setSearchInput} />
