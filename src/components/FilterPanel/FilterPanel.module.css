@@ -1,0 +1,41 @@
+.panel {
+  width: 220px;
+  flex-shrink: 0;
+}
+
+.heading {
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-muted);
+  margin-bottom: var(--space-3);
+}
+
+.list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.option {
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: 0;
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--text-sm);
+  color: var(--color-ink);
+  text-transform: capitalize;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: background 0.1s ease;
+}
+
+.option:hover { background: var(--color-bg); }
+
+.active,
+.active:hover {
+  background: var(--color-ink);
+  color: var(--color-surface);
+}

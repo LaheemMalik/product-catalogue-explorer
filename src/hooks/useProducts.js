@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { getProducts } from '../api/products';
 
-export function useProducts({ search, limit, skip }) {
+export function useProducts({ search, category, sort, limit, skip }) {
   const [state, setState] = useState({
     status: 'loading',
     products: [],
@@ -14,7 +14,7 @@ export function useProducts({ search, limit, skip }) {
     const controller = new AbortController();
     setState((s) => ({ ...s, status: 'loading', error: null }));
 
-    getProducts({ search, limit, skip, signal: controller.signal })
+    getProducts({ search, category, sort, limit, skip, signal: controller.signal })
       .then((data) => {
         const products = data.products ?? [];
         setState({
@@ -30,7 +30,7 @@ export function useProducts({ search, limit, skip }) {
       });
 
     return () => controller.abort();
-  }, [search, limit, skip, attempt]);
+  }, [search, category, sort, limit, skip, attempt]);
 
   return { ...state, retry: () => setAttempt((n) => n + 1) };
 }
