@@ -3,6 +3,7 @@ import { useProducts } from './hooks/useProducts';
 import { useCategories } from './hooks/useCategories';
 import { useDebounce } from './hooks/useDebounce';
 import { sanitizeSearch } from './utils/validate';
+import SortDropdown from './components/SortDropdown/SortDropdown';
 import ProductGrid from './components/ProductGrid/ProductGrid';
 import SkeletonGrid from './components/Skeleton/Skeleton';
 import ErrorState from './components/ErrorState/ErrorState';
@@ -14,19 +15,19 @@ import styles from './App.module.css';
 function App() {
   const [searchInput, setSearchInput] = useState('');
   const [category, setCategory] = useState('');
+  const [sort, setSort] = useState('');
 
   const debouncedSearch = useDebounce(searchInput, 350);
   const cleanedSearch = sanitizeSearch(debouncedSearch);
   const categories = useCategories();
 
-  const { status, products, error, retry, total } = useProducts({
-    search: cleanedSearch,
-    // An active search ignores the category filter (no combined endpoint upstream).
-    category: cleanedSearch ? '' : category,
-    sort: '',
-    limit: 20,
-    skip: 0,
-  });
+const { status, products, error, retry, total } = useProducts({
+  search: cleanedSearch,
+  category: cleanedSearch ? '' : category,
+  sort,
+  limit: 20,
+  skip: 0,
+});
 
   return (
     <div className={styles.app}>
@@ -49,10 +50,11 @@ function App() {
 
         <div className={styles.content}>
           <div className={styles.toolbar}>
-            <span className={styles.count}>
-              {status === 'success' ? `${total} products` : ''}
-            </span>
-          </div>
+  <span className={styles.count}>
+    {status === 'success' ? `${total} products` : ''}
+  </span>
+  <SortDropdown value={sort} onChange={setSort} />
+</div>
 
           {status === 'loading' && <SkeletonGrid count={8} />}
           {status === 'error' && <ErrorState error={error} onRetry={retry} />}
