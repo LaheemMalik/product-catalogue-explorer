@@ -1,10 +1,12 @@
 import { useProducts } from './hooks/useProducts';
-import SkeletonGrid from './components/Skeleton/Skeleton';
 import ProductGrid from './components/ProductGrid/ProductGrid';
+import SkeletonGrid from './components/Skeleton/Skeleton';
+import ErrorState from './components/ErrorState/ErrorState';
+import EmptyState from './components/EmptyState/EmptyState';
 import styles from './App.module.css';
 
 function App() {
-  const { status, products } = useProducts({ limit: 20, skip: 0 });
+  const { status, products, error, retry } = useProducts({ limit: 20, skip: 0 });
 
   return (
     <div className={styles.app}>
@@ -17,8 +19,8 @@ function App() {
 
       <main className={styles.main}>
         {status === 'loading' && <SkeletonGrid count={8} />}
-        {status === 'error' && <p>Something went wrong.</p>}
-        {status === 'empty' && <p>No products found.</p>}
+        {status === 'error' && <ErrorState error={error} onRetry={retry} />}
+        {status === 'empty' && <EmptyState />}
         {status === 'success' && <ProductGrid products={products} />}
       </main>
     </div>

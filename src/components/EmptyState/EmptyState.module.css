@@ -1,0 +1,16 @@
+.wrap {
+  text-align: center;
+  padding: var(--space-8) var(--space-5);
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.title {
+  font-size: var(--text-lg);
+  font-weight: 600;
+  margin-bottom: var(--space-2);
+}
+
+.body {
+  color: var(--color-muted);
+}

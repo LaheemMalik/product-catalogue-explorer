@@ -8,6 +8,7 @@ export function useProducts({ limit, skip }) {
     total: 0,
     error: null,
   });
+  const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -24,12 +25,12 @@ export function useProducts({ limit, skip }) {
         });
       })
       .catch((err) => {
-        if (err.type === 'aborted') return; // stale request, ignore it
+        if (err.type === 'aborted') return;
         setState({ status: 'error', products: [], total: 0, error: err });
       });
 
     return () => controller.abort();
-  }, [limit, skip]);
+  }, [limit, skip, attempt]);
 
-  return state;
+  return { ...state, retry: () => setAttempt((n) => n + 1) };
 }
