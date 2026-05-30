@@ -5,32 +5,42 @@
 }
 
 .header {
-  border-bottom: 1px solid #e5e5e5;
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
 }
 
 .headerInner {
-  max-width: 1200px;
+  max-width: var(--container);
   margin: 0 auto;
-  padding: 1rem 1.25rem;
+  padding: var(--space-4) var(--space-5);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.brand {
   display: flex;
   align-items: baseline;
-  gap: 0.75rem;
+  gap: var(--space-3);
 }
 
 .logo {
-  font-size: 1.25rem;
+  font-size: var(--text-xl);
   font-weight: 700;
+  letter-spacing: -0.02em;
 }
 
 .tagline {
-  color: #666;
-  font-size: 0.875rem;
+  color: var(--color-muted);
+  font-size: var(--text-sm);
 }
 
 .main {
   flex: 1;
   width: 100%;
-  max-width: 1200px;
+  max-width: var(--container);
   margin: 0 auto;
-  padding: 1.5rem 1.25rem;
+  padding: var(--space-5);
 }
