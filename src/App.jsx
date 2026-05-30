@@ -1,6 +1,10 @@
+import { useProducts } from './hooks/useProducts';
+import ProductGrid from './components/ProductGrid/ProductGrid';
 import styles from './App.module.css';
 
 function App() {
+  const { status, products } = useProducts({ limit: 20, skip: 0 });
+
   return (
     <div className={styles.app}>
       <header className={styles.header}>
@@ -11,7 +15,10 @@ function App() {
       </header>
 
       <main className={styles.main}>
-        <p>Products will appear here.</p>
+        {status === 'loading' && <p>Loading products…</p>}
+        {status === 'error' && <p>Something went wrong.</p>}
+        {status === 'empty' && <p>No products found.</p>}
+        {status === 'success' && <ProductGrid products={products} />}
       </main>
     </div>
   );
