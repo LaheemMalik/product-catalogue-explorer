@@ -20,6 +20,7 @@ const PAGE_SIZE = 20;
 function App() {
   const [urlState, updateUrl] = useUrlState();
   const [searchInput, setSearchInput] = useState(urlState.search);
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
   const debounced = useDebounce(searchInput, 350);
   const cleanedSearch = sanitizeSearch(debounced);
@@ -34,14 +35,25 @@ function App() {
     setSearchInput(urlState.search);
   }, [urlState.search]);
 
-  // Scroll to the top when paging so the user sees the new page.
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [urlState.page]);
 
-  const categories = useCategories();
+  // Lock body scroll and listen for Escape while the mobile drawer is open.
+  useEffect(() => {
+    if (!filtersOpen) return;
+    document.body.style.overflow = 'hidden';
+    const onKey = (e) => { if (e.key === 'Escape') setFiltersOpen(false); };
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.body.style.overflow = '';
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [filtersOpen]);
 
+  const categories = useCategories();
   const skip = (urlState.page - 1) * PAGE_SIZE;
+
   const { status, products, error, retry, total } = useProducts({
     search: urlState.search,
     category: urlState.search ? '' : urlState.category,
@@ -50,7 +62,6 @@ function App() {
     skip,
   });
 
-  // If filters shrink the result set below the current page, snap back to page 1.
   useEffect(() => {
     if (status === 'empty' && urlState.page > 1) {
       updateUrl({ page: 1 });
@@ -59,13 +70,18 @@ function App() {
 
   const totalPages = Math.ceil(total / PAGE_SIZE);
 
+  const handleCategory = (c) => {
+    updateUrl({ category: c, page: 1 });
+    setFiltersOpen(false);
+  };
+
   return (
     <div className={styles.app}>
       <header className={styles.header}>
         <div className={styles.headerInner}>
           <div className={styles.brand}>
             <h1 className={styles.logo}>Catalog</h1>
-            <span className={styles.tagline}>Browse products</span>
+            <span className={styles.tagline}> Browse products</span>
           </div>
           <SearchBar value={searchInput} onChange={setSearchInput} />
         </div>
@@ -75,11 +91,20 @@ function App() {
         <FilterPanel
           categories={categories}
           selected={urlState.category}
-          onChange={(c) => updateUrl({ category: c, page: 1 })}
+          onChange={handleCategory}
+          isOpen={filtersOpen}
+          onClose={() => setFiltersOpen(false)}
         />
 
         <div className={styles.content}>
           <div className={styles.toolbar}>
+            <button
+              type="button"
+              className={styles.filtersToggle}
+              onClick={() => setFiltersOpen(true)}
+            >
+              Filters
+            </button>
             <span className={styles.count}>
               {status === 'success' ? `${total} products` : ''}
             </span>

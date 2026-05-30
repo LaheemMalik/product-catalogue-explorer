@@ -1,32 +1,52 @@
 import styles from './FilterPanel.module.css';
 
-function FilterPanel({ categories, selected, onChange }) {
+function FilterPanel({ categories, selected, onChange, isOpen, onClose }) {
   return (
-    <aside className={styles.panel}>
-      <h2 className={styles.heading}>Category</h2>
-      <ul className={styles.list}>
-        <li>
+    <>
+      <div
+        className={`${styles.backdrop} ${isOpen ? styles.backdropOpen : ''}`}
+        onClick={onClose}
+        aria-hidden="true"
+      />
+      <aside
+        className={`${styles.panel} ${isOpen ? styles.panelOpen : ''}`}
+        aria-label="Filters"
+      >
+        <div className={styles.head}>
+          <h2 className={styles.heading}>Category</h2>
           <button
             type="button"
-            className={`${styles.option} ${!selected ? styles.active : ''}`}
-            onClick={() => onChange('')}
+            className={styles.close}
+            onClick={onClose}
+            aria-label="Close filters"
           >
-            All
+            ×
           </button>
-        </li>
-        {categories.map((cat) => (
-          <li key={cat}>
+        </div>
+        <ul className={styles.list}>
+          <li>
             <button
               type="button"
-              className={`${styles.option} ${selected === cat ? styles.active : ''}`}
-              onClick={() => onChange(cat)}
+              className={`${styles.option} ${!selected ? styles.active : ''}`}
+              onClick={() => onChange('')}
             >
-              {cat.replace(/-/g, ' ')}
+              All
             </button>
           </li>
-        ))}
-      </ul>
-    </aside>
+          {categories.map((cat) => (
+            <li key={cat}>
+              <button
+                type="button"
+                className={`${styles.option} ${selected === cat ? styles.active : ''}`}
+                onClick={() => onChange(cat)}
+              >
+                {cat.replace(/-/g, ' ')}
+              </button>
+            </li>
+          ))}
+        </ul>
+      </aside>
+    </>
   );
 }
 
