@@ -4,7 +4,6 @@ import { useCategories } from './hooks/useCategories';
 import { useDebounce } from './hooks/useDebounce';
 import { useUrlState } from './hooks/useUrlState';
 import { sanitizeSearch } from './utils/validate';
-import ActiveFilters from './components/ActiveFilters/ActiveFilters';
 import ProductGrid from './components/ProductGrid/ProductGrid';
 import SkeletonGrid from './components/Skeleton/Skeleton';
 import ErrorState from './components/ErrorState/ErrorState';
@@ -12,7 +11,11 @@ import EmptyState from './components/EmptyState/EmptyState';
 import SearchBar from './components/SearchBar/SearchBar';
 import FilterPanel from './components/FilterPanel/FilterPanel';
 import SortDropdown from './components/SortDropdown/SortDropdown';
+import ActiveFilters from './components/ActiveFilters/ActiveFilters';
+import Pagination from './components/Pagination/Pagination';
 import styles from './App.module.css';
+
+const PAGE_SIZE = 20;
 
 function App() {
   const [urlState, updateUrl] = useUrlState();
@@ -21,27 +24,40 @@ function App() {
   const debounced = useDebounce(searchInput, 350);
   const cleanedSearch = sanitizeSearch(debounced);
 
-  // Push the debounced/cleaned search into the URL.
   useEffect(() => {
     if (cleanedSearch !== urlState.search) {
-      updateUrl({ search: cleanedSearch });
+      updateUrl({ search: cleanedSearch, page: 1 });
     }
   }, [cleanedSearch, urlState.search, updateUrl]);
 
-  // Keep the input in sync when the URL changes from back/forward navigation.
   useEffect(() => {
     setSearchInput(urlState.search);
   }, [urlState.search]);
 
+  // Scroll to the top when paging so the user sees the new page.
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [urlState.page]);
+
   const categories = useCategories();
 
+  const skip = (urlState.page - 1) * PAGE_SIZE;
   const { status, products, error, retry, total } = useProducts({
     search: urlState.search,
     category: urlState.search ? '' : urlState.category,
     sort: urlState.sort,
-    limit: 20,
-    skip: 0,
+    limit: PAGE_SIZE,
+    skip,
   });
+
+  // If filters shrink the result set below the current page, snap back to page 1.
+  useEffect(() => {
+    if (status === 'empty' && urlState.page > 1) {
+      updateUrl({ page: 1 });
+    }
+  }, [status, urlState.page, updateUrl]);
+
+  const totalPages = Math.ceil(total / PAGE_SIZE);
 
   return (
     <div className={styles.app}>
@@ -59,7 +75,7 @@ function App() {
         <FilterPanel
           categories={categories}
           selected={urlState.category}
-          onChange={(c) => updateUrl({ category: c })}
+          onChange={(c) => updateUrl({ category: c, page: 1 })}
         />
 
         <div className={styles.content}>
@@ -69,22 +85,24 @@ function App() {
             </span>
             <SortDropdown
               value={urlState.sort}
-              onChange={(s) => updateUrl({ sort: s })}
+              onChange={(s) => updateUrl({ sort: s, page: 1 })}
             />
           </div>
+
           <ActiveFilters
-  search={urlState.search}
-  category={urlState.category}
-  onClearSearch={() => {
-    setSearchInput('');
-    updateUrl({ search: '' });
-  }}
-  onClearCategory={() => updateUrl({ category: '' })}
-  onClearAll={() => {
-    setSearchInput('');
-    updateUrl({ search: '', category: '', sort: '' });
-  }}
-/>
+            search={urlState.search}
+            category={urlState.category}
+            onClearSearch={() => {
+              setSearchInput('');
+              updateUrl({ search: '', page: 1 });
+            }}
+            onClearCategory={() => updateUrl({ category: '', page: 1 })}
+            onClearAll={() => {
+              setSearchInput('');
+              updateUrl({ search: '', category: '', sort: '', page: 1 });
+            }}
+          />
+
           {status === 'loading' && <SkeletonGrid count={8} />}
           {status === 'error' && <ErrorState error={error} onRetry={retry} />}
           {status === 'empty' && (
@@ -93,7 +111,16 @@ function App() {
               body="Try a different search or category."
             />
           )}
-          {status === 'success' && <ProductGrid products={products} />}
+          {status === 'success' && (
+            <>
+              <ProductGrid products={products} />
+              <Pagination
+                page={urlState.page}
+                totalPages={totalPages}
+                onChange={(p) => updateUrl({ page: p })}
+              />
+            </>
+          )}
         </div>
       </main>
     </div>
